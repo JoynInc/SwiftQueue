@@ -106,6 +106,18 @@ public final class SwiftQueueManager {
         return count
     }
 
+    /// Schedule the builder
+    public func add(jobBuilder: JobBuilder) {
+        if jobBuilder.info.isPersisted {
+            // Check if we will be able to serialize args
+            assert(JSONSerialization.isValidJSONObject(jobBuilder.info.params))
+        }
+        
+        let queue = getQueue(queueName: jobBuilder.info.group)
+        let job = queue.createHandler(type: jobBuilder.info.type, params: jobBuilder.info.params)
+        queue.addOperation(SqOperation(job: job, info: jobBuilder.info, logger: logger))
+    }
+
 }
 
 internal class SqManagerParams {
